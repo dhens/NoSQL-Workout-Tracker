@@ -39,24 +39,23 @@ app.get('/stats', (req, res) => {
 })
 
 // Provide all saved workouts
-app.get('/api/workouts', (req, res) => {
-    db.Workout.find({})
-        .then(workoutDB => {
-            res.json(workoutDB);
-        })
-        .catch(err => {
-            res.json(err);
-        });
-});
-
-// Create new workout with user provided {body} info 
 app.get("/api/workouts",(req,res)=>{
     db.Workout.find({})
-    .then(dbWorkouts => {
-        res.json(dbWorkouts);
+    .then(workoutDB => {
+        res.json(workoutDB);
     })
     .catch(err => {
         res.json(err);
+    });
+});
+
+app.post("/api/workouts",(req,res)=>{
+    db.Workout.create(new db.Workout(req.body))
+    .then(workoutDB => {
+        res.send(workoutDB);
+    })
+    .catch(error =>{
+        res.json(error);
     });
 });
 
