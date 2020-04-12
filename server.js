@@ -3,15 +3,13 @@ const express = require('express');
 const mongojs = require('mongojs')
 const mongoose = require('mongoose');
 const path = require('path')
-const PORT = process.env.port || 3000;
+const PORT = process.env.PORT || 3000;
+
 
 // Define our mongodb info
-const databaseUrl = 'workout-tracker';
-const collections = ['workouts'];
-const db = mongojs(databaseUrl, collections);
+const db = require('./models');
 
 const app = express();
-const Workout = require('./models/Workout');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
@@ -42,32 +40,44 @@ app.get('/stats', (req, res) => {
 
 // Provide all saved workouts
 app.get('/api/workouts', (req, res) => {
-    db.workouts.find({}, (err, data) => {
-        let totalWorkoutDuration = null;
-        let lastWorkout = data.length-1;
-
-        for (let i = 0; i < data[lastWorkout].exercises[i].duration; i++) {
-            totalDuration += data[lastWorkout].exercises[i].duration;
-        }
-
-        data[lastWorkout].totalDuration = totalDuration;
-
-        if (err) res.send(err);
-        else res.json(data);
-    })
+    db.Workout.find({})
+        .then(workoutDB => {
+            res.json(workoutDB);
+        })
+        .catch(err => {
+            res.json(err);
+        });
 });
 
 // Create new workout with user provided {body} info 
-app.post('/api/workouts', ({body}, res) => {
+app.post('/api/workouts', ({ body }, res) => {
     Workout.create(body)
-    .then(workoutDB => 
-        res.json(workoutDB))
-    .catch(err => {
-        res.json(err)
-    });
+        .then(workoutDB =>
+            res.json(workoutDB))
+        .catch(err => {
+            res.json(err)
+        });
 });
 
+// Update workout by provided ID
+app.put("/api/workouts/:id", (req, res) => {
+    db.Workout.findByIdAndUpdate(req.params.id,
+        {
+            $push: {
+                "exercises": req.body
+            }
+        },
+        {
+            new: true
+        }
+    ).then(dbUpdateWorkout => {
+        res.json(dbUpdateWorkout);
+    })
+        .catch(err => {
+            res.json(err);
+        });
+});
 
 app.listen(PORT, () => {
     console.log(`App running on port ${PORT}!`);
-  });
+});
