@@ -50,13 +50,14 @@ app.get('/api/workouts', (req, res) => {
 });
 
 // Create new workout with user provided {body} info 
-app.post('/api/workouts', ({ body }, res) => {
-    Workout.create(body)
-        .then(workoutDB =>
-            res.json(workoutDB))
-        .catch(err => {
-            res.json(err)
-        });
+app.get("/api/workouts",(req,res)=>{
+    db.Workout.find({})
+    .then(dbWorkouts => {
+        res.json(dbWorkouts);
+    })
+    .catch(err => {
+        res.json(err);
+    });
 });
 
 // Update workout by provided ID
