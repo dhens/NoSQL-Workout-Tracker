@@ -1,55 +1,66 @@
+// Express + Mongo Modules and dependencies for project
 const express = require('express');
 const mongojs = require('mongojs')
 const mongoose = require('mongoose');
 const path = require('path')
+const PORT = process.env.port || 3000;
+
+// Define our mongodb info
+const databaseUrl = 'workout-tracker';
+const collections = ['workouts'];
+const db = mongojs(databaseUrl, collections);
 
 const app = express();
+const Workout = require('./models/Workout');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(express.static('public'));
 
-const databaseUrl = 'workout-tracker';
-const collections = ['workouts'];
-const db = mongojs(databaseUrl, collections);
-
-db.on('error', error => {
-    console.log('Database Error: ', error);
+// Connect mongoose with params
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost/workout-tracker', {
+    useNewUrlParser: true,
+    useFindAndModify: false,
+    // Fixes deprecated server discovery and monitoring engine warning
+    useUnifiedTopology: true
 });
 
-//load page when user finds us
+// Index Page
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
+// Add exercise
 app.get('/exercise', (req, res) => {
     res.sendFile(path.join(__dirname + '/public/exercise.html'));
 })
 
-// have a route to submit to
-app.get('/submit', (req, res) => {
-    db.workouts.insert(req.body, (error, data) => {
-        if (err) {
-            res.send(err);
-        } else {
-            res.send(response);
-        }
+// See generated workout stats
+app.get('/stats', (req, res) => {
+    res.sendFile(path.join(__dirname + '/public/stats.html'));
+})
+
+// Provide all saved workouts
+app.get('/api/workouts', (req, res) => {
+    db.workouts.find({})
+    .then(workoutDB => 
+        res.json(workoutDB))
+    .catch(err => {
+        res.json(err)
     });
 });
 
-// take the response and put it in the db
+// Create new workout with user provided {body} info 
+app.post('/api/workouts', ({body}, res) => {
+    Workout.create(body)
+    .then(workoutDB => 
+        res.json(workoutDB))
+    .catch(err => {
+        res.json(err)
+    });
+});
 
-// find a workout by id
 
-
-// update a workout by id
-
-// delete a workout by id
-
-// delete all workouts
-
-app.get('')
-app.listen(3000, () => {
-    console.log("App running on port 3000!");
+app.listen(PORT, () => {
+    console.log(`App running on port ${PORT}!`);
   });
-  
