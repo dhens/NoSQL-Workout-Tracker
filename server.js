@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname + '/public/index.html'));
 });
 
-// Add exercise
+// Add exercise page
 app.get('/exercise', (req, res) => {
     res.sendFile(path.join(__dirname + '/public/exercise.html'));
 })
@@ -42,12 +42,19 @@ app.get('/stats', (req, res) => {
 
 // Provide all saved workouts
 app.get('/api/workouts', (req, res) => {
-    db.workouts.find({})
-    .then(workoutDB => 
-        res.json(workoutDB))
-    .catch(err => {
-        res.json(err)
-    });
+    db.workouts.find({}, (err, data) => {
+        let totalWorkoutDuration = null;
+        let lastWorkout = data.length-1;
+
+        for (let i = 0; i < data[lastWorkout].exercises[i].duration; i++) {
+            totalDuration += data[lastWorkout].exercises[i].duration;
+        }
+
+        data[lastWorkout].totalDuration = totalDuration;
+
+        if (err) res.send(err);
+        else res.json(data);
+    })
 });
 
 // Create new workout with user provided {body} info 
