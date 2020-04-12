@@ -4,7 +4,7 @@ Build a workout tracker and save data with MongoDB and Mongoose. This is a back 
 
 Production page: https://radiant-forest-96357.herokuapp.com/
 
-![workoutPage](Capture.png)
+![workoutPage](Capture.PNG)
 
 ## This repo contains:
 * This README
